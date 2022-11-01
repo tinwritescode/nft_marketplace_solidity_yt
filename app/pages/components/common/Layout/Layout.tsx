@@ -11,7 +11,7 @@ function Layout({ children }: Props) {
     <>
       <Header />
 
-      {children}
+      <main className="max-w-5xl mx-auto">{children}</main>
 
       <Footer />
     </>
