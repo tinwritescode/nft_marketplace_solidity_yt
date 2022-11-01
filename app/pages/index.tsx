@@ -1,12 +1,12 @@
-import type { NextPage } from "next";
-import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
 import Button from "./components/common/Button/Button";
 import Card from "./components/common/Card/Card";
 import Input from "./components/common/Input/Input";
+import ReactPaginate from "react-paginate";
 
 const Home = () => {
+  const handlePageClick = () => {};
+  const pageCount = 4;
+
   return (
     <main>
       <p>Hello world</p>
@@ -27,6 +27,19 @@ const Home = () => {
         <Card />
         <Card />
       </div>
+      <ReactPaginate
+        breakLabel="..."
+        nextLabel="next >"
+        onPageChange={handlePageClick}
+        pageRangeDisplayed={5}
+        pageCount={pageCount}
+        previousLabel="< previous"
+        containerClassName="flex justify-center items-center space-x-2 mt-4"
+        activeClassName="bg-gray-900 text-white p-2 rounded"
+        pageClassName="bg-gray-200 p-2 aspect-square w-10 text-center rounded"
+        previousClassName="bg-gray-200 p-2 text-center rounded"
+        nextClassName="bg-gray-200 p-2 text-center rounded"
+      />
     </main>
   );
 };
