@@ -11,14 +11,14 @@ describe("Token contract", function () {
 
     const marketplaceContract = await NFTMarketplace.deploy();
     await marketplaceContract.deployed();
-    const hardhatToken = await Token.deploy(marketplaceContract.address);
-    await hardhatToken.deployed();
+    const nft = await Token.deploy(marketplaceContract.address);
+    await nft.deployed();
 
     return {
       Token,
       NFTMarketplace,
       marketplaceContract,
-      hardhatToken,
+      hardhatToken: nft,
       owner,
       addr1,
       addr2,
