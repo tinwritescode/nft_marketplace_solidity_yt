@@ -10,6 +10,7 @@ import {
 const addresses = require("../contracts/contract-address.json");
 
 export const CHAIN_ID = "0x539";
+export const CHAIN_NAME = "Localnet";
 
 interface Web3ModelStore {
   isConnected: boolean;
@@ -87,7 +88,7 @@ export const useWeb3Store = create<Web3ModelStore>((set, get) => ({
     }
 
     //@ts-ignore
-    ethereum.on("chainChanged", (_chainId) => window.location.reload());
+    ethereum.on("chainChanged", () => window.location.reload());
 
     set({
       nftContract: MonoNFT__factory.connect(addresses.nftAddress, provider),
