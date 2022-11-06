@@ -4,6 +4,7 @@
 import { Contract } from "ethers";
 import { network, artifacts, ethers } from "hardhat";
 import path from "path";
+import { MonoNFT } from "../typechain-types";
 
 async function main() {
   // This is just a convenience check
@@ -26,7 +27,6 @@ async function main() {
 
   const Token = await ethers.getContractFactory("MonoNFT");
   const NFTMarketplace = await ethers.getContractFactory("NFTMarketplace");
-
   const marketplaceContract = await NFTMarketplace.deploy();
   await marketplaceContract.deployed();
   const nft = await Token.deploy(marketplaceContract.address);
@@ -43,14 +43,32 @@ async function main() {
     nftName: "MonoNFT",
   });
 
+  const targetAddress = "0xa35514D88b0A9E2B057493bf5a147cfCa46F6562";
+
   // faucet to 0xa35514D88b0A9E2B057493bf5a147cfCa46F6562
   await deployer.sendTransaction({
-    to: "0xa35514D88b0A9E2B057493bf5a147cfCa46F6562",
+    to: targetAddress,
     value: ethers.utils.parseEther("100.0"),
   });
 
-  console.log("Faucet to 0xa35514D88b0A9E2B057493bf5a147cfCa46F6562");
+  console.log("Faucet to " + targetAddress);
+
+  const count = 10;
+
+  // giveaway
+  await mintNft(targetAddress, count, nft);
+  console.log("[DEBUG] Minted " + count + " NFTs");
 }
+
+const mintNft = async (address: string, count: number, nft: MonoNFT) => {
+  await Promise.all(
+    (
+      await Promise.all(
+        new Array(count).fill(0).map((_, i) => nft.giveAway(address))
+      )
+    ).map((tx) => tx.wait())
+  );
+};
 
 function saveFrontendFiles({
   nftContract,

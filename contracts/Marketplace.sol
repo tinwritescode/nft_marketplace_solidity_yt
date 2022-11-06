@@ -23,12 +23,30 @@ contract NFTMarketplace is Ownable, ReentrancyGuard {
 
     mapping(uint256 => ListingItem) public listingItems;
 
-    function getListingItems() public view returns (ListingItem[] memory) {
-        ListingItem[] memory items = new ListingItem[](_listingIds.current());
-        for (uint256 i = 0; i < _listingIds.current(); i++) {
-            items[i] = listingItems[i];
+    function getListingItems(uint256 offset, uint256 limit)
+        public
+        view
+        returns (ListingItem[] memory)
+    {
+        require(offset >= 0, "offset must be greater than 0");
+        require(limit > 0, "limit must be greater than 0");
+
+        uint256 resultLength = (offset + limit) > _listingIds.current()
+            ? (_listingIds.current() - offset)
+            : limit;
+
+        require(resultLength > 0, "result length must be greater than 0");
+        ListingItem[] memory items = new ListingItem[](resultLength);
+
+        for (uint256 i = 0; i < resultLength; i++) {
+            items[i] = listingItems[i + offset];
         }
+
         return items;
+    }
+
+    function totalListingItems() public view returns (uint256) {
+        return _listingIds.current();
     }
 
     function listItem(
