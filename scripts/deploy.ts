@@ -5,6 +5,7 @@ import { Contract } from "ethers";
 import { network, artifacts, ethers } from "hardhat";
 import path from "path";
 import { MonoNFT } from "../typechain-types";
+import fs from "fs";
 
 async function main() {
   // This is just a convenience check
@@ -81,7 +82,6 @@ function saveFrontendFiles({
   nftName: string;
   marketplaceName: string;
 }) {
-  const fs = require("fs");
   const contractsDir = path.join(__dirname, "..", "app", "contracts");
 
   if (!fs.existsSync(contractsDir)) {
