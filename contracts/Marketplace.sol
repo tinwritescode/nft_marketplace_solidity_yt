@@ -19,6 +19,12 @@ contract NFTMarketplace is Ownable, ReentrancyGuard {
         bool isSold;
     }
 
+    uint256 public listingPrice;
+
+    constructor(uint256 _listingPrice) {
+        listingPrice = _listingPrice;
+    }
+
     Counters.Counter private _listingIds;
 
     mapping(uint256 => ListingItem) public listingItems;
@@ -55,6 +61,10 @@ contract NFTMarketplace is Ownable, ReentrancyGuard {
         uint256 price
     ) public payable nonReentrant {
         require(price > 0, "Price must be greater than 0");
+        require(
+            msg.value == listingPrice,
+            "Price must be equal to listing price"
+        );
         IERC721(tokenAddress).transferFrom(msg.sender, address(this), tokenId);
         listingItems[_listingIds.current()] = ListingItem(
             tokenId,

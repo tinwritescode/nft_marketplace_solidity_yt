@@ -9,7 +9,9 @@ describe("Token contract", function () {
     const NFTMarketplace = await ethers.getContractFactory("NFTMarketplace");
     const [owner, addr1, addr2] = await ethers.getSigners();
 
-    const marketplaceContract = await NFTMarketplace.deploy();
+    const marketplaceContract = await NFTMarketplace.deploy(
+      ethers.utils.parseEther("0.1")
+    );
     await marketplaceContract.deployed();
     const nft = await Token.deploy(marketplaceContract.address);
     await nft.deployed();
@@ -50,9 +52,11 @@ describe("Token contract", function () {
       await hardhatToken.connect(addr1).approve(marketplaceContract.address, 1);
       await marketplaceContract
         .connect(addr1)
-        .listItem(hardhatToken.address, 1, ethers.utils.parseEther("0.1"));
+        .listItem(hardhatToken.address, 1, ethers.utils.parseEther("0.1"), {
+          value: ethers.utils.parseEther("0.1"),
+        });
 
-      console.log(await marketplaceContract.getListingItems());
+      console.log(await marketplaceContract.getListingItems(0, 10));
 
       // expect(await hardhatToken.ownerOf(1)).to.equal(
       //   marketplaceContract.address
