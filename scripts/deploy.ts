@@ -28,7 +28,9 @@ async function main() {
 
   const Token = await ethers.getContractFactory("MonoNFT");
   const NFTMarketplace = await ethers.getContractFactory("NFTMarketplace");
-  const marketplaceContract = await NFTMarketplace.deploy();
+  const marketplaceContract = await NFTMarketplace.deploy(
+    ethers.utils.parseEther("0.1")
+  );
   await marketplaceContract.deployed();
   const nft = await Token.deploy(marketplaceContract.address);
   await nft.deployed();
