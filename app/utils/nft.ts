@@ -1,66 +1,67 @@
-import { ERC721__factory, MonoNFT, NFTMarketplace } from "../typechain";
 import axios from "axios";
-import { ethers } from "ethers";
+import { useWeb3Store } from "../store/web3Store";
+import { BaseListReturn } from "./marketplace";
 
 export const getUserNFTs = async (
-  url: string,
-  nftContract: MonoNFT,
+  _url: string,
   walletAddress: string,
   offset: number,
   limit: number
-) => {
-  const totalNfts = await nftContract.balanceOf(walletAddress);
+): Promise<BaseListReturn> => {
+  const { nftContract } = useWeb3Store.getState();
 
-  if (totalNfts.toNumber() < offset) return [];
+  const totalNfts = await nftContract!.balanceOf(walletAddress);
 
-  return (
-    await Promise.all(
-      Array.from(Array(limit).keys()).map(async (i) => {
-        if (i + offset >= totalNfts.toNumber()) return null;
+  if (totalNfts.toNumber() < offset)
+    return {
+      items: [],
+      meta: {
+        totalItem: 0,
+        totalPage: 0,
+      },
+    };
 
-        const nftId = (
-          await nftContract.tokenOfOwnerByIndex(walletAddress, i + offset)
-        ).toNumber();
+  return {
+    items: (
+      await Promise.all(
+        Array.from(Array(limit).keys()).map(async (i) => {
+          if (i + offset >= totalNfts.toNumber()) return null;
 
-        const tokenURI = await nftContract.tokenURI(nftId);
+          const nftId = (
+            await nftContract!.tokenOfOwnerByIndex(walletAddress, i + offset)
+          ).toNumber();
 
-        return {
-          ...(await axios.get(tokenURI)).data,
-          tokenId: nftId,
-        };
-      })
-    )
-  ).filter((nft) => nft);
+          const tokenURI = await nftContract!.tokenURI(nftId);
+
+          return {
+            ...(await axios.get(tokenURI)).data,
+            tokenId: nftId,
+          };
+        })
+      )
+    ).filter((nft) => nft),
+    meta: {
+      totalItem: totalNfts.toNumber(),
+      totalPage: Math.ceil(totalNfts.toNumber() / limit),
+    },
+  };
 };
 
-export const getMarketplaceNFTs = async (
-  url: string,
-  marketplaceContract: NFTMarketplace,
-  offset: number,
-  limit: number
-) => {
-  const totalNfts = await marketplaceContract.totalListingItems();
-  const provider = new ethers.providers.JsonRpcProvider(url);
+export const getNFTById = async (_url: string, tokenId: number) => {
+  const { nftContract } = useWeb3Store.getState();
 
-  if (totalNfts.toNumber() < offset) return [];
+  if (!nftContract) return null;
 
-  return (
-    await Promise.all(
-      Array.from(Array(limit).keys()).map(async (i) => {
-        if (i + offset >= totalNfts.toNumber()) return null;
+  const [tokenURI, owner, getApproved] = await Promise.all([
+    nftContract.tokenURI(tokenId),
+    nftContract.ownerOf(tokenId),
+    nftContract.getApproved(tokenId),
+  ]);
 
-        const { tokenId, tokenAddress } =
-          await marketplaceContract.listingItems(i + offset);
-
-        const nftAddress = ERC721__factory.connect(tokenAddress, provider);
-
-        const tokenURI = await nftAddress.tokenURI(tokenId);
-
-        return {
-          ...(await axios.get(tokenURI)).data,
-          tokenId,
-        };
-      })
-    )
-  ).filter((nft) => nft);
+  return {
+    ...(await axios.get(tokenURI)).data,
+    tokenId,
+    owner,
+    getApproved,
+  };
 };

@@ -9,11 +9,13 @@ type Props = {
 function Layout({ children }: Props) {
   return (
     <>
-      <Header />
+      <div className="max-w-5xl mx-auto">
+        <Header />
 
-      <main className="max-w-5xl mx-auto">{children}</main>
+        <main>{children}</main>
 
-      <Footer />
+        <Footer />
+      </div>
     </>
   );
 }

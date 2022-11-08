@@ -65,11 +65,9 @@ async function main() {
 
 const mintNft = async (address: string, count: number, nft: MonoNFT) => {
   await Promise.all(
-    (
-      await Promise.all(
-        new Array(count).fill(0).map((_, i) => nft.giveAway(address))
-      )
-    ).map((tx) => tx.wait())
+    new Array(count)
+      .fill(0)
+      .map((_, i) => nft.giveAway(address).then((val) => val.wait()))
   );
 };
 

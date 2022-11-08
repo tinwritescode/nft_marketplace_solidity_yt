@@ -56,9 +56,14 @@ export interface NFTMarketplaceInterface extends utils.Interface {
   functions: {
     "buyItem(uint256)": FunctionFragment;
     "cancelListing(uint256)": FunctionFragment;
+    "getItemPrice(uint256)": FunctionFragment;
     "getListingItems(uint256,uint256)": FunctionFragment;
+    "getTotalItems()": FunctionFragment;
+    "getTotalUnsoldItems()": FunctionFragment;
+    "getUnsoldItems(uint256,uint256)": FunctionFragment;
     "listItem(address,uint256,uint256)": FunctionFragment;
     "listingItems(uint256)": FunctionFragment;
+    "listingPrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "totalListingItems()": FunctionFragment;
@@ -69,9 +74,14 @@ export interface NFTMarketplaceInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "buyItem"
       | "cancelListing"
+      | "getItemPrice"
       | "getListingItems"
+      | "getTotalItems"
+      | "getTotalUnsoldItems"
+      | "getUnsoldItems"
       | "listItem"
       | "listingItems"
+      | "listingPrice"
       | "owner"
       | "renounceOwnership"
       | "totalListingItems"
@@ -87,7 +97,23 @@ export interface NFTMarketplaceInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "getItemPrice",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getListingItems",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTotalItems",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTotalUnsoldItems",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getUnsoldItems",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
@@ -101,6 +127,10 @@ export interface NFTMarketplaceInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "listingItems",
     values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "listingPrice",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -122,12 +152,32 @@ export interface NFTMarketplaceInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getItemPrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getListingItems",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTotalItems",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTotalUnsoldItems",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getUnsoldItems",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "listItem", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "listingItems",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "listingPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -145,11 +195,28 @@ export interface NFTMarketplaceInterface extends utils.Interface {
   ): Result;
 
   events: {
+    "ListingItemCreated(uint256,uint256,address,address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ListingItemCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
+
+export interface ListingItemCreatedEventObject {
+  id: BigNumber;
+  tokenId: BigNumber;
+  tokenAddress: string;
+  seller: string;
+  price: BigNumber;
+}
+export type ListingItemCreatedEvent = TypedEvent<
+  [BigNumber, BigNumber, string, string, BigNumber],
+  ListingItemCreatedEventObject
+>;
+
+export type ListingItemCreatedEventFilter =
+  TypedEventFilter<ListingItemCreatedEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
@@ -200,11 +267,26 @@ export interface NFTMarketplace extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    getItemPrice(
+      listingId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     getListingItems(
       offset: PromiseOrValue<BigNumberish>,
       limit: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[NFTMarketplace.ListingItemStructOutput[]]>;
+
+    getTotalItems(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getTotalUnsoldItems(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getUnsoldItems(
+      offset: PromiseOrValue<BigNumberish>,
+      limit: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[NFTMarketplace.ListingItemStructOutput[], BigNumber[]]>;
 
     listItem(
       tokenAddress: PromiseOrValue<string>,
@@ -225,6 +307,8 @@ export interface NFTMarketplace extends BaseContract {
         isSold: boolean;
       }
     >;
+
+    listingPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -250,11 +334,26 @@ export interface NFTMarketplace extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  getItemPrice(
+    listingId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   getListingItems(
     offset: PromiseOrValue<BigNumberish>,
     limit: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<NFTMarketplace.ListingItemStructOutput[]>;
+
+  getTotalItems(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getTotalUnsoldItems(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getUnsoldItems(
+    offset: PromiseOrValue<BigNumberish>,
+    limit: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<[NFTMarketplace.ListingItemStructOutput[], BigNumber[]]>;
 
   listItem(
     tokenAddress: PromiseOrValue<string>,
@@ -275,6 +374,8 @@ export interface NFTMarketplace extends BaseContract {
       isSold: boolean;
     }
   >;
+
+  listingPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -300,18 +401,33 @@ export interface NFTMarketplace extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    getItemPrice(
+      listingId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getListingItems(
       offset: PromiseOrValue<BigNumberish>,
       limit: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<NFTMarketplace.ListingItemStructOutput[]>;
 
+    getTotalItems(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalUnsoldItems(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getUnsoldItems(
+      offset: PromiseOrValue<BigNumberish>,
+      limit: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[NFTMarketplace.ListingItemStructOutput[], BigNumber[]]>;
+
     listItem(
       tokenAddress: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
       price: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
 
     listingItems(
       arg0: PromiseOrValue<BigNumberish>,
@@ -326,6 +442,8 @@ export interface NFTMarketplace extends BaseContract {
       }
     >;
 
+    listingPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
@@ -339,6 +457,21 @@ export interface NFTMarketplace extends BaseContract {
   };
 
   filters: {
+    "ListingItemCreated(uint256,uint256,address,address,uint256)"(
+      id?: PromiseOrValue<BigNumberish> | null,
+      tokenId?: PromiseOrValue<BigNumberish> | null,
+      tokenAddress?: PromiseOrValue<string> | null,
+      seller?: null,
+      price?: null
+    ): ListingItemCreatedEventFilter;
+    ListingItemCreated(
+      id?: PromiseOrValue<BigNumberish> | null,
+      tokenId?: PromiseOrValue<BigNumberish> | null,
+      tokenAddress?: PromiseOrValue<string> | null,
+      seller?: null,
+      price?: null
+    ): ListingItemCreatedEventFilter;
+
     "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
       newOwner?: PromiseOrValue<string> | null
@@ -360,7 +493,22 @@ export interface NFTMarketplace extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    getItemPrice(
+      listingId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getListingItems(
+      offset: PromiseOrValue<BigNumberish>,
+      limit: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getTotalItems(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTotalUnsoldItems(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getUnsoldItems(
       offset: PromiseOrValue<BigNumberish>,
       limit: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -377,6 +525,8 @@ export interface NFTMarketplace extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    listingPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -403,7 +553,24 @@ export interface NFTMarketplace extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    getItemPrice(
+      listingId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getListingItems(
+      offset: PromiseOrValue<BigNumberish>,
+      limit: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getTotalItems(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getTotalUnsoldItems(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getUnsoldItems(
       offset: PromiseOrValue<BigNumberish>,
       limit: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -420,6 +587,8 @@ export interface NFTMarketplace extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    listingPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

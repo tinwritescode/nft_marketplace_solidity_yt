@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
-import Button from "../Button/Button";
+import Button, { ButtonPreset } from "../Button/Button";
 import {
   CHAIN_ID,
   CHAIN_NAME,
@@ -64,14 +64,14 @@ function Header({}: Props) {
   };
 
   return (
-    <div className="m-4">
+    <div className="m-4 sticky top-0 z-50">
       <div className="flex justify-between items-center">
         <Button onClick={() => connect()}>
           <span>{isConnected ? walletAddress : "Connect"}</span>
         </Button>
 
         {isConnected && (
-          <Button onClick={() => disconnect()}>
+          <Button onClick={() => disconnect()} preset={ButtonPreset.Outlined}>
             <span>Disconnect</span>
           </Button>
         )}
